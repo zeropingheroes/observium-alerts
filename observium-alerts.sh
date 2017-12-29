@@ -23,6 +23,8 @@ OBSERVIUM_MYSQL_DB=${OBSERVIUM_MYSQL_DB:-observium}
 
 COMMAND=${1,,}
 FILENAME=${2}
+QUIET=${3}
+
 : "${FILENAME:?must be set}"
 
 # Commands
@@ -33,9 +35,12 @@ case $COMMAND in
         echo "Observium alerts exported to $FILENAME"
         ;;
     "import")
-        read -p "This will remove your existing alerts - are you sure? (y/n)" -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]
+        if [ -z "$QUIET" ]
+	then
+            read -p "This will remove your existing alerts - are you sure? (y/n)" -n 1 -r
+            echo $QUIET
+	fi
+        if [[ $REPLY =~ ^[Yy]$ ]] || [[ -n "$QUIET" ]]
         then
             /usr/bin/mysql -u$OBSERVIUM_MYSQL_USERNAME -p$OBSERVIUM_MYSQL_PASSWORD $OBSERVIUM_MYSQL_DB < $FILENAME
             echo "Observium alerts imported from $FILENAME"
